@@ -3,8 +3,15 @@ from typing import Dict, Any, Optional, List, TypeVar, Callable, Awaitable, Unio
 import functools
 import inspect
 import logging
+from websockets.asyncio.client import connect
 
-from app.config import HA_URL, HA_TOKEN, get_ha_headers
+from app.config import (
+    HA_URL,
+    HA_WS_URL,
+    HA_TOKEN,
+    HA_FILTER_EXPOSED,
+    get_ha_headers
+)
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -38,6 +45,27 @@ DOMAIN_IMPORTANT_ATTRIBUTES = {
     "scene": [],
     "script": ["last_triggered"],
 }
+
+
+async def send_and_wait(ws, msg_id, msg_type):
+    await ws.send(json.dumps({"id": msg_id, "type": msg_type}))
+    while True:
+        msg = json.loads(await ws.recv())
+        if msg.get("id") == msg_id and msg.get("type") == "result":
+            return msg.get("result")
+
+
+async def get_exposed_entities():
+    async with connect(HA_WS_URL, max_size=1048576**2) as ws:
+        await ws.recv()  # auth_required
+        await ws.send(json.dumps({"type": "auth", "access_token": HA_TOKEN}))
+        auth_response = await ws.recv()
+        if "auth_ok" not in auth_response:
+            raise Exception("WebSocket authentication failed.")
+
+        exposed = await send_and_wait(ws, 1, "homeassistant/expose_entity/list")
+        return [v for v in list(exposed.get('exposed_entities').keys())]
+
 
 def handle_api_errors(func: F) -> F:
     """
@@ -109,9 +137,12 @@ async def get_all_entity_states() -> Dict[str, Dict[str, Any]]:
     response = await client.get(f"{HA_URL}/api/states", headers=get_ha_headers())
     response.raise_for_status()
     entities = response.json()
-    
+    if HA_FILTER_EXPOSED:
+        exposed = await get_exposed_entities()
+    else:
+        exposed = None
     # Create a mapping for easier access
-    return {entity["entity_id"]: entity for entity in entities}
+    return {entity["entity_id"]: entity for entity in entities if (exposed is None or entity["entity_id"] in exposed)}
 
 def filter_fields(data: Dict[str, Any], fields: List[str]) -> Dict[str, Any]:
     """

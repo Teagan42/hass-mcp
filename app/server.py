@@ -1,12 +1,14 @@
 import functools
 import logging
 import json
+import os
 import httpx
 from typing import List, Dict, Any, Optional, Callable, Awaitable, TypeVar, cast
 
+LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=LOGLEVEL,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler()

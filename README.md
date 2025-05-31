@@ -65,12 +65,15 @@ Hass-MCP enables AI assistants like Claude to interact directly with your Home A
            "-e",
            "HA_URL",
            "-e",
+           "HA_FILTER_EXPOSED",
+           "-e",
            "HA_TOKEN",
            "voska/hass-mcp"
          ],
          "env": {
            "HA_URL": "http://homeassistant.local:8123",
-           "HA_TOKEN": "YOUR_LONG_LIVED_TOKEN"
+           "HA_TOKEN": "YOUR_LONG_LIVED_TOKEN",
+           "HA_FILTER_EXPOSED": "true"
          }
        }
      }
@@ -99,7 +102,7 @@ Hass-MCP enables AI assistants like Claude to interact directly with your Home A
    - Type: `command`
    - Command:
      ```
-     docker run -i --rm -e HA_URL=http://homeassistant.local:8123 -e HA_TOKEN=YOUR_LONG_LIVED_TOKEN voska/hass-mcp
+     docker run -i --rm -e HA_URL=http://homeassistant.local:8123 -e HA_TOKEN=YOUR_LONG_LIVED_TOKEN -e HA_FILTER_EXPOSED=true voska/hass-mcp
      ```
    - Replace `YOUR_LONG_LIVED_TOKEN` with your actual Home Assistant token
    - Update the HA_URL to match your Home Assistant instance address
@@ -112,7 +115,7 @@ To use with Claude Code CLI, you can add the MCP server directly using the `mcp 
 **Using Docker (recommended):**
 
 ```bash
-claude mcp add hass-mcp -e HA_URL=http://homeassistant.local:8123 -e HA_TOKEN=YOUR_LONG_LIVED_TOKEN -- docker run -i --rm -e HA_URL -e HA_TOKEN voska/hass-mcp
+claude mcp add hass-mcp -e HA_URL=http://homeassistant.local:8123 -e HA_TOKEN=YOUR_LONG_LIVED_TOKEN -- docker run -i --rm -e HA_URL -e HA_TOKEN -e HA_FILTER_EXPOSED=true voska/hass-mcp
 ```
 
 Replace `YOUR_LONG_LIVED_TOKEN` with your actual Home Assistant token and update the HA_URL to match your Home Assistant instance address.
