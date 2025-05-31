@@ -271,6 +271,13 @@ async def get_entities(
     response = await client.get(f"{HA_URL}/api/states", headers=get_ha_headers())
     response.raise_for_status()
     entities = response.json()
+
+    if HA_FILTER_EXPOSED:
+        exposed = await get_exposed_entities()
+    else:
+        exposed = None
+    # Create a mapping for easier access
+    return {entity["entity_id"]: entity for entity in entities if (exposed is None or entity["entity_id"] in exposed)}
     
     # Filter by domain if specified
     if domain:
