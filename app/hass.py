@@ -61,10 +61,12 @@ async def get_exposed_entities():
         await ws.recv()  # auth_required
         await ws.send(json.dumps({"type": "auth", "access_token": HA_TOKEN}))
         auth_response = await ws.recv()
+        logger.debug(json.dumps(auth_response))
         if "auth_ok" not in auth_response:
             raise Exception("WebSocket authentication failed.")
 
         exposed = await send_and_wait(ws, 1, "homeassistant/expose_entity/list")
+        logger.debug(json.dumps(exposed))
         return [v for v in list(exposed.get('exposed_entities').keys())]
 
 
