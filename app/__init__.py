@@ -7,6 +7,6 @@ logging.basicConfig(level=LOGLEVEL, format="%(asctime)s %(message)s")
 from .server import mcp
 
 
-def main():
+def run():
     """Run the MCP server with stdio communication"""
     mcp.run()
