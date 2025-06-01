@@ -19,3 +19,7 @@ test = [
 testpaths = ["tests"]
 python_files = "test_*.py"
 asyncio_mode = "auto"
+[tool.uv]
+package = true
+[project.scripts]
+app = "app:run"
